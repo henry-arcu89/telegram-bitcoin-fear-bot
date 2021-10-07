@@ -1,6 +1,6 @@
 const TelegramBot = require("node-telegram-bot-api");
 const axios = require("axios");
-const dotenv = require('dotenv');
+const dotenv = require("dotenv");
 dotenv.config();
 
 // replace the value below with the Telegram token you receive from @BotFather
@@ -40,15 +40,15 @@ bot.on("message", (msg) => {
         .then(function (response) {
           // handle success
           const fear = response.data.data[0].value;
-          bot.sendMessage(chatId, getMessage(fear));
+          const message = getMessage(fear);
+          if(message){
+            bot.sendMessage(chatId, message);
+          }          
         })
         .catch(function (error) {
           // handle error
           console.log(error);
         })
-        .then(function () {
-          // always executed
-        });
 
       // do your stuff here
     }, the_interval);
@@ -57,27 +57,42 @@ bot.on("message", (msg) => {
       .get("https://api.alternative.me/fng/")
       .then(function (response) {
         // handle success
-        const fear = response.data.data[0].value;
-        bot.sendMessage(chatId, getMessage(fear));
+        const fear = response.data.data[0].value;        
+        const message = getMessage(fear);
+          if(message){
+            bot.sendMessage(chatId, message);
+          } else {
+            bot.sendMessage(chatId, "HOLD: The Fear & Greed Index of Bitcoin is " + fear);
+          } 
       })
       .catch(function (error) {
         // handle error
         console.log(error);
       })
-      .then(function () {
-        // always executed
-      });
   } else {
-    bot.sendMessage(chatId, 'For get current Fear Index, you can send: NOW, Now or now\n\nFor subscribe to the chanel, you can send: Start, START or start');
+    bot.sendMessage(
+      chatId,
+      "For get current Fear Index, you can send: NOW, Now or now\n\nFor subscribe to the chanel, you can send: Start, START or start"
+    );
   }
 });
 
 function getMessage(fear) {
-  if (fear >= 75) {
+  if (fear >= 79) {
+    return (
+      "OMG SELL NOW, It's a bubble: The Fear & Greed Index of Bitcoin is " +
+      fear
+    );
+  } else if (fear >= 75 && fear < 79) {
     return "SELL: The Fear & Greed Index of Bitcoin is " + fear;
-  } else if (fear <= 25) {
+  } else if (fear <= 25 && fear > 19) {
     return "BUY: The Fear & Greed Index of Bitcoin is " + fear;
+  } else if (fear <= 19) {
+    return (
+      "OMG BUY NOW, It's very cheap: The Fear & Greed Index of Bitcoin is " +
+      fear
+    );
   } else {
-    return "HOLD: The Fear & Greed Index of Bitcoin is " + fear;
+    return false;
   }
 }
