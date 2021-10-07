@@ -1,8 +1,10 @@
 const TelegramBot = require("node-telegram-bot-api");
 const axios = require("axios");
+const dotenv = require('dotenv');
+dotenv.config();
 
 // replace the value below with the Telegram token you receive from @BotFather
-const token = "TELEGRAM_TOKEN_BOT";
+const token = process.env.TELEGRAM_TOKEN_BOT;
 
 const MINUTES = 1;
 
