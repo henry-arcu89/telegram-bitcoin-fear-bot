@@ -1,0 +1,25 @@
+{
+  "name": "telegram-bitcoin-fear-bot",
+  "version": "0.0.1",
+  "description": "Telegram Bitcoin Fear Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "crypto",
+    "buy",
+    "sell",
+    "bitcoin",
+    "notify"
+  ],
+  "author": "Enric Arasa",
+  "license": "GNU",
+  "dependencies": {
+    "axios": "^0.22.0",
+    "node-telegram-bot-api": "^0.54.0"
+  }
+}
