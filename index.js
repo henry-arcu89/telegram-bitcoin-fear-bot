@@ -85,12 +85,15 @@ bot.on("message", (msg) => {
         console.log(error);
       });
   } else if (
-        msg.text.toLowerCase() === "stop" ||
-        msg.text.toLowerCase() === "/stop"
-      ) {
+    msg.text.toLowerCase() === "stop" ||
+    msg.text.toLowerCase() === "/stop"
+  ) {
+    const index = subscribed.findIndex((chat) => chat.id == chatId);
+    if (index > -1) {
+      subscribed.splice(index, 1);
+    }
     bot.sendMessage(chatId, "Ok, now you are unsubscribed.");
-    subscribed[chatId].status = false;
-    saveData();    
+    saveData();
   } else {
     bot.sendMessage(
       chatId,
@@ -157,9 +160,9 @@ function isTheMomentForSendIt(fear, loop) {
 
 async function loadData() {
   await storage.init({
-    stringify: JSON.stringify, 
-    parse: JSON.parse, 
-    encoding: 'utf8'
+    stringify: JSON.stringify,
+    parse: JSON.parse,
+    encoding: "utf8",
   });
 
   if ((await storage.getItem("subscribed")) === undefined) {
@@ -170,9 +173,9 @@ async function loadData() {
 }
 
 async function saveData() {
-  await storage.updateItem("subscribed",subscribed);
+  await storage.updateItem("subscribed", subscribed);
 }
 
 function isSubscribed(chatId) {
-  return subscribed.filter(chat => chat.id == chatId).length
+  return subscribed.filter((chat) => chat.id == chatId).length;
 }
