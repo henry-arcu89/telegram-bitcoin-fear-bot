@@ -3,15 +3,13 @@ const axios = require("axios");
 const dotenv = require("dotenv");
 dotenv.config();
 
-// replace the value below with the Telegram token you receive from @BotFather
 const token = process.env.TELEGRAM_TOKEN_BOT;
+const bot = new TelegramBot(token, { polling: true });
 
 const MINUTES = process.env.MINUTES;
 
-// Create a bot that uses 'polling' to fetch new updates
-const bot = new TelegramBot(token, { polling: true });
+let subscribed = [];
 
-// Matches "/echo [whatever]"
 bot.onText(/\/echo (.+)/, (msg, match) => {
   // 'msg' is the received Message from Telegram
   // 'match' is the result of executing the regexp above on the text content
@@ -24,39 +22,44 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
   bot.sendMessage(chatId, resp);
 });
 
-// Listen for any kind of message. There are different kinds of
-// messages.
+var the_interval = MINUTES * 60 * 1000;
+setInterval(function () {
+  axios
+    .get("https://api.alternative.me/fng/")
+    .then(function (response) {
+        const fear = response.data.data[0].value;
+        const message = getMessage(fear);
+        if(message){       
+          subscribed.forEach((chatId) => {
+            if(chatId.status) {
+                bot.sendMessage(chatId.id, message);
+              }
+          })        
+        }          
+    })
+    .catch(function (error) {
+      console.log(error);
+    })
+}, the_interval);
+
 bot.on("message", (msg) => {
   const chatId = msg.chat.id;
 
-  if (msg.text.toLowerCase() === "start") {
-    // send a message to the chat acknowledging receipt of their message
-    bot.sendMessage(chatId, "Subscribed, thanks!");
-
-    var the_interval = MINUTES * 60 * 1000;
-    setInterval(function () {
-      axios
-        .get("https://api.alternative.me/fng/")
-        .then(function (response) {
-          // handle success
-          const fear = response.data.data[0].value;
-          const message = getMessage(fear);
-          if(message){
-            bot.sendMessage(chatId, message);
-          }          
-        })
-        .catch(function (error) {
-          // handle error
-          console.log(error);
-        })
-
-      // do your stuff here
-    }, the_interval);
-  } else if (msg.text.toLowerCase() === "now") {
+  if (msg.text.toLowerCase() === "start" || msg.text.toLowerCase() === "/start") {
+    if(!subscribed[chatId]?.status){
+      bot.sendMessage(chatId, "Subscribed, thanks!");
+      subscribed[chatId] = {
+        id: chatId,
+        status: true
+      };      
+    }else {
+      bot.sendMessage(chatId, "You are already subscribed.");
+    }   
+    
+  } else if (msg.text.toLowerCase() === "now" || msg.text.toLowerCase() === "/now") {
     axios
       .get("https://api.alternative.me/fng/")
       .then(function (response) {
-        // handle success
         const fear = response.data.data[0].value;        
         const message = getMessage(fear);
           if(message){
@@ -66,13 +69,12 @@ bot.on("message", (msg) => {
           } 
       })
       .catch(function (error) {
-        // handle error
         console.log(error);
       })
   } else {
     bot.sendMessage(
       chatId,
-      "For get current Fear Index, you can send: NOW, Now or now\n\nFor subscribe to the chanel, you can send: Start, START or start"
+      "For get current Fear Index, you can send: /now, NOW, Now or now\n\nFor subscribe to the chanel, you can send: /start, Start, START or start"
     );
   }
 });
