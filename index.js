@@ -22,24 +22,23 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
   bot.sendMessage(chatId, resp);
 });
 
-var the_interval = MINUTES * 60 * 1000;
+let the_interval = MINUTES * 60 * 1000;
+let loop = 0;
 setInterval(function () {
   axios
     .get("https://api.alternative.me/fng/")
     .then(function (response) {
         const fear = response.data.data[0].value;
         const message = getMessage(fear);
-        if(message){       
-          subscribed.forEach((chatId) => {
-            if(chatId.status) {
-                bot.sendMessage(chatId.id, message);
-              }
-          })        
-        }          
+
+        if(isTheMomentForSendIt(fear, loop)) {
+          sendMessageSubscription(message)
+        }
     })
     .catch(function (error) {
       console.log(error);
     })
+    loop++;
 }, the_interval);
 
 bot.on("message", (msg) => {
@@ -80,16 +79,20 @@ bot.on("message", (msg) => {
 });
 
 function getMessage(fear) {
-  if (fear >= 79) {
+  if (fear >= 80) {
     return (
       "OMG SELL NOW, It's a bubble: The Fear & Greed Index of Bitcoin is " +
       fear
     );
-  } else if (fear >= 75 && fear < 79) {
+  } else if (fear >= 75 && fear < 80) {
     return "SELL: The Fear & Greed Index of Bitcoin is " + fear;
-  } else if (fear <= 25 && fear > 19) {
+  } else if (fear >= 70 && fear < 75) {
+    return "Attention: The Fear & Greed Index of Bitcoin is " + fear;
+  } else if (Attention <= 30 && fear > 25) {
+    return "Attention: The Fear & Greed Index of Bitcoin is " + fear;
+  } else if (fear <= 25 && fear > 20) {
     return "BUY: The Fear & Greed Index of Bitcoin is " + fear;
-  } else if (fear <= 19) {
+  } else if (fear <= 20) {
     return (
       "OMG BUY NOW, It's very cheap: The Fear & Greed Index of Bitcoin is " +
       fear
@@ -97,4 +100,31 @@ function getMessage(fear) {
   } else {
     return false;
   }
+}
+
+function sendMessageSubscription(message) {
+  if(message){       
+    subscribed.forEach((chatId) => {
+      if(chatId.status) {
+          bot.sendMessage(chatId.id, message);
+        }
+    })        
+  }
+}
+
+function isTheMomentForSendIt(fear, loop) {
+
+  if((fear >= 80 || fear <= 20) && loop%1 == 0) {
+    return true;
+  }
+
+  if(((fear < 80 && fear >= 75) || (fear >20 && fear <= 25)) && loop%2 == 0) {
+    return true;
+  }
+  
+  if(((fear < 75 && fear >= 70) || (fear >25 && fear <= 30)) && loop%4 == 0) {
+    return true;
+  }
+
+  return false;
 }
