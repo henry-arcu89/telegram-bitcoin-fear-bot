@@ -88,7 +88,7 @@ function getMessage(fear) {
     return "SELL: The Fear & Greed Index of Bitcoin is " + fear;
   } else if (fear >= 70 && fear < 75) {
     return "Attention: The Fear & Greed Index of Bitcoin is " + fear;
-  } else if (Attention <= 30 && fear > 25) {
+  } else if (fear <= 30 && fear > 25) {
     return "Attention: The Fear & Greed Index of Bitcoin is " + fear;
   } else if (fear <= 25 && fear > 20) {
     return "BUY: The Fear & Greed Index of Bitcoin is " + fear;
