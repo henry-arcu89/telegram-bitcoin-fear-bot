@@ -2,7 +2,6 @@ const TelegramBot = require("node-telegram-bot-api");
 const axios = require("axios");
 const dotenv = require("dotenv");
 const storage = require("node-persist");
-const { init } = require("node-persist");
 dotenv.config();
 
 const token = process.env.TELEGRAM_TOKEN_BOT;
@@ -54,13 +53,13 @@ bot.on("message", (msg) => {
     msg.text.toLowerCase() === "start" ||
     msg.text.toLowerCase() === "/start"
   ) {
-    if (!subscribed[chatId]?.status) {
+    if (!isSubscribed(chatId)) {
       bot.sendMessage(chatId, "Subscribed, thanks!");
-      subscribed[chatId] = {
+      subscribed.push({
         id: chatId,
         status: true,
-      };
-      saveData(subscribed);
+      });
+      saveData();
     } else {
       bot.sendMessage(chatId, "You are already subscribed.");
     }
@@ -85,6 +84,13 @@ bot.on("message", (msg) => {
       .catch(function (error) {
         console.log(error);
       });
+  } else if (
+        msg.text.toLowerCase() === "stop" ||
+        msg.text.toLowerCase() === "/stop"
+      ) {
+    bot.sendMessage(chatId, "Ok, now you are unsubscribed.");
+    subscribed[chatId].status = false;
+    saveData();    
   } else {
     bot.sendMessage(
       chatId,
@@ -150,7 +156,11 @@ function isTheMomentForSendIt(fear, loop) {
 }
 
 async function loadData() {
-  await storage.init(/* options ... */);
+  await storage.init({
+    stringify: JSON.stringify, 
+    parse: JSON.parse, 
+    encoding: 'utf8'
+  });
 
   if ((await storage.getItem("subscribed")) === undefined) {
     await storage.setItem("subscribed", []);
@@ -159,6 +169,10 @@ async function loadData() {
   return Object.values(await storage.getItem("subscribed"));
 }
 
-async function saveData(subscribed) {
-  await storage.setItem("subscribed", subscribed);
+async function saveData() {
+  await storage.updateItem("subscribed",subscribed);
+}
+
+function isSubscribed(chatId) {
+  return subscribed.filter(chat => chat.id == chatId).length
 }
