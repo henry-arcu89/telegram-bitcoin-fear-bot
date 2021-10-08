@@ -7,7 +7,7 @@ dotenv.config();
 const token = process.env.TELEGRAM_TOKEN_BOT;
 const bot = new TelegramBot(token, { polling: true });
 
-const MINUTES = process.env.MINUTES;
+const MINUTES = Number(process.env.MINUTES);
 
 let subscribed = [];
 
@@ -102,7 +102,7 @@ bot.on("message", (msg) => {
   }
 });
 
-function getMessage(fear) {
+function getMessage(fear): string | boolean {
   if (fear >= 80) {
     return (
       "OMG SELL NOW, It's a bubble: The Fear & Greed Index of Bitcoin is " +
@@ -126,7 +126,7 @@ function getMessage(fear) {
   }
 }
 
-function sendMessageSubscription(message) {
+function sendMessageSubscription(message: string | boolean) {
   if (message) {
     subscribed.forEach((chatId) => {
       if (chatId.status) {
@@ -136,7 +136,7 @@ function sendMessageSubscription(message) {
   }
 }
 
-function isTheMomentForSendIt(fear, loop) {
+function isTheMomentForSendIt(fear: number, loop: number): boolean {
   if ((fear >= 80 || fear <= 20) && loop % 1 == 0) {
     return true;
   }
@@ -172,7 +172,7 @@ async function loadData() {
   return Object.values(await storage.getItem("subscribed"));
 }
 
-async function saveData() {
+async function saveData(): Promise<void> {
   await storage.updateItem("subscribed", subscribed);
 }
 
