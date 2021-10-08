@@ -1,6 +1,7 @@
 const TelegramBot = require("node-telegram-bot-api");
 const axios = require("axios");
 const dotenv = require("dotenv");
+const storage = require("node-persist");
 dotenv.config();
 
 const token = process.env.TELEGRAM_TOKEN_BOT;
@@ -9,6 +10,10 @@ const bot = new TelegramBot(token, { polling: true });
 const MINUTES = process.env.MINUTES;
 
 let subscribed = [];
+
+void (async function main() {
+  subscribed = await loadData();
+})();
 
 bot.onText(/\/echo (.+)/, (msg, match) => {
   // 'msg' is the received Message from Telegram
@@ -28,48 +33,67 @@ setInterval(function () {
   axios
     .get("https://api.alternative.me/fng/")
     .then(function (response) {
-        const fear = response.data.data[0].value;
-        const message = getMessage(fear);
+      const fear = response.data.data[0].value;
+      const message = getMessage(fear);
 
-        if(isTheMomentForSendIt(fear, loop)) {
-          sendMessageSubscription(message)
-        }
+      if (isTheMomentForSendIt(fear, loop)) {
+        sendMessageSubscription(message);
+      }
     })
     .catch(function (error) {
       console.log(error);
-    })
-    loop++;
+    });
+  loop++;
 }, the_interval);
 
 bot.on("message", (msg) => {
   const chatId = msg.chat.id;
 
-  if (msg.text.toLowerCase() === "start" || msg.text.toLowerCase() === "/start") {
-    if(!subscribed[chatId]?.status){
+  if (
+    msg.text.toLowerCase() === "start" ||
+    msg.text.toLowerCase() === "/start"
+  ) {
+    if (!isSubscribed(chatId)) {
       bot.sendMessage(chatId, "Subscribed, thanks!");
-      subscribed[chatId] = {
+      subscribed.push({
         id: chatId,
-        status: true
-      };      
-    }else {
+        status: true,
+      });
+      saveData();
+    } else {
       bot.sendMessage(chatId, "You are already subscribed.");
-    }   
-    
-  } else if (msg.text.toLowerCase() === "now" || msg.text.toLowerCase() === "/now") {
+    }
+  } else if (
+    msg.text.toLowerCase() === "now" ||
+    msg.text.toLowerCase() === "/now"
+  ) {
     axios
       .get("https://api.alternative.me/fng/")
       .then(function (response) {
-        const fear = response.data.data[0].value;        
+        const fear = response.data.data[0].value;
         const message = getMessage(fear);
-          if(message){
-            bot.sendMessage(chatId, message);
-          } else {
-            bot.sendMessage(chatId, "HOLD: The Fear & Greed Index of Bitcoin is " + fear);
-          } 
+        if (message) {
+          bot.sendMessage(chatId, message);
+        } else {
+          bot.sendMessage(
+            chatId,
+            "HOLD: The Fear & Greed Index of Bitcoin is " + fear
+          );
+        }
       })
       .catch(function (error) {
         console.log(error);
-      })
+      });
+  } else if (
+    msg.text.toLowerCase() === "stop" ||
+    msg.text.toLowerCase() === "/stop"
+  ) {
+    const index = subscribed.findIndex((chat) => chat.id == chatId);
+    if (index > -1) {
+      subscribed.splice(index, 1);
+    }
+    bot.sendMessage(chatId, "Ok, now you are unsubscribed.");
+    saveData();
   } else {
     bot.sendMessage(
       chatId,
@@ -103,28 +127,55 @@ function getMessage(fear) {
 }
 
 function sendMessageSubscription(message) {
-  if(message){       
+  if (message) {
     subscribed.forEach((chatId) => {
-      if(chatId.status) {
-          bot.sendMessage(chatId.id, message);
-        }
-    })        
+      if (chatId.status) {
+        bot.sendMessage(chatId.id, message);
+      }
+    });
   }
 }
 
 function isTheMomentForSendIt(fear, loop) {
-
-  if((fear >= 80 || fear <= 20) && loop%1 == 0) {
+  if ((fear >= 80 || fear <= 20) && loop % 1 == 0) {
     return true;
   }
 
-  if(((fear < 80 && fear >= 75) || (fear >20 && fear <= 25)) && loop%2 == 0) {
+  if (
+    ((fear < 80 && fear >= 75) || (fear > 20 && fear <= 25)) &&
+    loop % 2 == 0
+  ) {
     return true;
   }
-  
-  if(((fear < 75 && fear >= 70) || (fear >25 && fear <= 30)) && loop%4 == 0) {
+
+  if (
+    ((fear < 75 && fear >= 70) || (fear > 25 && fear <= 30)) &&
+    loop % 4 == 0
+  ) {
     return true;
   }
 
   return false;
+}
+
+async function loadData() {
+  await storage.init({
+    stringify: JSON.stringify,
+    parse: JSON.parse,
+    encoding: "utf8",
+  });
+
+  if ((await storage.getItem("subscribed")) === undefined) {
+    await storage.setItem("subscribed", []);
+  }
+
+  return Object.values(await storage.getItem("subscribed"));
+}
+
+async function saveData() {
+  await storage.updateItem("subscribed", subscribed);
+}
+
+function isSubscribed(chatId) {
+  return subscribed.filter((chat) => chat.id == chatId).length;
 }
