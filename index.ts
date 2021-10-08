@@ -25,7 +25,7 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
   // 'match' is the result of executing the regexp above on the text content
   // of the message
 
-  const chatId = msg.chat.id;
+  const chatId: number = msg.chat.id;
   const resp = match[1]; // the captured "whatever"
 
   // send back the matched "whatever" to the chat
@@ -38,7 +38,7 @@ setInterval(function () {
   axios
     .get("https://api.alternative.me/fng/")
     .then(function (response) {
-      const fear = response.data.data[0].value;
+      const fear: number = response.data.data[0].value;
       const message = getMessage(fear);
 
       if (isTheMomentForSendIt(fear, loop)) {
@@ -52,7 +52,7 @@ setInterval(function () {
 }, the_interval);
 
 bot.on("message", (msg) => {
-  const chatId = msg.chat.id;
+  const chatId: number = msg.chat.id;
 
   if (
     msg.text.toLowerCase() === "start" ||
@@ -163,7 +163,7 @@ function isTheMomentForSendIt(fear: number, loop: number): boolean {
   return false;
 }
 
-async function loadData() {
+async function loadData(): Promise<Chatconfig[]> {
   await storage.init({
     stringify: JSON.stringify,
     parse: JSON.parse,
@@ -181,6 +181,6 @@ async function saveData(): Promise<void> {
   await storage.updateItem("subscribed", subscribed);
 }
 
-function isSubscribed(chatId: number) {
-  return subscribed.filter((chat) => chat.id == chatId).length;
+function isSubscribed(chatId: number): boolean {
+  return (subscribed.filter((chat) => chat.id == chatId).length) ? true : false;
 }
