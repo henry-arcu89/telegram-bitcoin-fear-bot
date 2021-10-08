@@ -1,6 +1,6 @@
 {
   "name": "telegram-bitcoin-fear-bot",
-  "version": "0.0.3-alpha",
+  "version": "0.1.0-beta",
   "description": "Telegram Bitcoin Fear Bot",
   "main": "index.js",
   "scripts": {
