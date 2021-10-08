@@ -9,7 +9,12 @@ const bot = new TelegramBot(token, { polling: true });
 
 const MINUTES = Number(process.env.MINUTES);
 
-let subscribed = [];
+type Chatconfig = {
+  id: number,
+  status: boolean,
+}
+
+let subscribed = [] as Chatconfig[];
 
 void (async function main() {
   subscribed = await loadData();
@@ -70,8 +75,8 @@ bot.on("message", (msg) => {
     axios
       .get("https://api.alternative.me/fng/")
       .then(function (response) {
-        const fear = response.data.data[0].value;
-        const message = getMessage(fear);
+        const fear: number = response.data.data[0].value;
+        const message: string | boolean = getMessage(fear);
         if (message) {
           bot.sendMessage(chatId, message);
         } else {
@@ -102,7 +107,7 @@ bot.on("message", (msg) => {
   }
 });
 
-function getMessage(fear): string | boolean {
+function getMessage(fear: number): string | boolean {
   if (fear >= 80) {
     return (
       "OMG SELL NOW, It's a bubble: The Fear & Greed Index of Bitcoin is " +
@@ -169,13 +174,13 @@ async function loadData() {
     await storage.setItem("subscribed", []);
   }
 
-  return Object.values(await storage.getItem("subscribed"));
+  return Object.values(await storage.getItem("subscribed")) as Chatconfig[];
 }
 
 async function saveData(): Promise<void> {
   await storage.updateItem("subscribed", subscribed);
 }
 
-function isSubscribed(chatId) {
+function isSubscribed(chatId: number) {
   return subscribed.filter((chat) => chat.id == chatId).length;
 }
