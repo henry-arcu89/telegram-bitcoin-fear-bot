@@ -76,7 +76,7 @@ bot.on("message", (msg) => {
       .get("https://api.alternative.me/fng/")
       .then(function (response) {
         const fear: number = response.data.data[0].value;
-        const message: string | boolean = getMessage(fear);
+        const message = getMessage(fear);
         if (message) {
           bot.sendMessage(chatId, message);
         } else {
@@ -107,7 +107,7 @@ bot.on("message", (msg) => {
   }
 });
 
-function getMessage(fear: number): string | boolean {
+function getMessage(fear: number): string {
   if (fear >= 80) {
     return (
       "OMG SELL NOW, It's a bubble: The Fear & Greed Index of Bitcoin is " +
@@ -127,11 +127,11 @@ function getMessage(fear: number): string | boolean {
       fear
     );
   } else {
-    return false;
+    return null;
   }
 }
 
-function sendMessageSubscription(message: string | boolean) {
+function sendMessageSubscription(message: string) {
   if (message) {
     subscribed.forEach((chatId) => {
       if (chatId.status) {
