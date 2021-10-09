@@ -47,14 +47,14 @@ bot.on("message", (msg) => {
     msg.text.toLowerCase() === "/start"
   ) {
     if (!isSubscribed(chatId)) {
-      bot.sendMessage(chatId, "Subscribed, thanks!");
+      bot.sendMessage(chatId, "Subscribed, thanks!  \u{2705}");
       subscribed.push({
         id: chatId,
         status: true,
       });
       saveData();
     } else {
-      bot.sendMessage(chatId, "You are already subscribed.");
+      bot.sendMessage(chatId, "You are already subscribed.  \u{2705}");
     }
   } else if (
     msg.text.toLowerCase() === "now" ||
@@ -85,7 +85,7 @@ bot.on("message", (msg) => {
     if (index > -1) {
       subscribed.splice(index, 1);
     }
-    bot.sendMessage(chatId, "Ok, now you are unsubscribed.");
+    bot.sendMessage(chatId, "Ok, now you are unsubscribed.  \u{274C}");
     saveData();
   } else {
     bot.sendMessage(
@@ -98,20 +98,20 @@ bot.on("message", (msg) => {
 function getMessage(fear: number): string {
   if (fear >= 80) {
     return (
-      "OMG SELL NOW, It's a bubble: The Fear & Greed Index of Bitcoin is " +
+      "OMG SELL NOW, It's a bubble: \u{1F6A8}\u{1F6A8}\u{1F6A8} The Fear & Greed Index of Bitcoin is " +
       fear
     );
   } else if (fear >= 75 && fear < 80) {
-    return "SELL: The Fear & Greed Index of Bitcoin is " + fear;
+    return "SELL: \u{1F6A8}\u{1F6A8} The Fear & Greed Index of Bitcoin is " + fear;
   } else if (fear >= 70 && fear < 75) {
-    return "Attention: The Fear & Greed Index of Bitcoin is " + fear;
+    return "Attention: \u{1F6A8} The Fear & Greed Index of Bitcoin is " + fear;
   } else if (fear <= 30 && fear > 25) {
-    return "Attention: The Fear & Greed Index of Bitcoin is " + fear;
+    return "Attention: \u{1F6A8} The Fear & Greed Index of Bitcoin is " + fear;
   } else if (fear <= 25 && fear > 20) {
-    return "BUY: The Fear & Greed Index of Bitcoin is " + fear;
+    return "BUY: \u{1F6A8}\u{1F6A8} The Fear & Greed Index of Bitcoin is " + fear;
   } else if (fear <= 20) {
     return (
-      "OMG BUY NOW, It's very cheap: The Fear & Greed Index of Bitcoin is " +
+      "OMG BUY NOW, It's very cheap: \u{1F6A8}\u{1F6A8}\u{1F6A8} The Fear & Greed Index of Bitcoin is " +
       fear
     );
   } else {
