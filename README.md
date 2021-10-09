@@ -1,5 +1,18 @@
-# telegram-bitcoin-fear-bot
-Telegram Bitcoin Fear Bot
+# Telegram Bitcoin Fear Bot
+
+## Build Setup
+
+```bash
+# install dependencies
+$ npm install
+or
+$ yarn 
+
+# build for production and launch telgram bot
+$ npm run start
+or
+$ yarn start
+```
 
 Custom Telegram that notify when Bitcoin Fear & Greed Index is in zones of buy or sell.
 
