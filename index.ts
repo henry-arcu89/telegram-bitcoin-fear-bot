@@ -20,18 +20,6 @@ void (async function main() {
   subscribed = await loadData();
 })();
 
-bot.onText(/\/echo (.+)/, (msg, match) => {
-  // 'msg' is the received Message from Telegram
-  // 'match' is the result of executing the regexp above on the text content
-  // of the message
-
-  const chatId: number = msg.chat.id;
-  const resp = match[1]; // the captured "whatever"
-
-  // send back the matched "whatever" to the chat
-  bot.sendMessage(chatId, resp);
-});
-
 let the_interval = MINUTES * 60 * 1000;
 let loop = 0;
 setInterval(function () {
@@ -102,7 +90,7 @@ bot.on("message", (msg) => {
   } else {
     bot.sendMessage(
       chatId,
-      "For get current Fear Index, you can send: /now, NOW, Now or now\n\nFor subscribe to the chanel, you can send: /start, Start, START or start"
+      "For get current Fear Index, you can send: /now, NOW, Now or now\n\nFor subscribe to the chanel, you can send: /start, Start, START or start\n\nFor unsubscribe to the chanel, you can send: /stop, Stop, STOP or stop"
     );
   }
 });
