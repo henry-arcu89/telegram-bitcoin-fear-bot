@@ -1,11 +1,12 @@
 {
   "name": "telegram-bitcoin-fear-bot",
-  "version": "0.1.0-beta",
+  "version": "0.2.0-beta",
   "description": "Telegram Bitcoin Fear Bot",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "tsc && node ./dist/index.js",
+    "tsc" : "tsc"
   },
   "keywords": [
     "telegram",
@@ -22,6 +23,10 @@
     "axios": "^0.22.0",
     "dotenv": "^10.0.0",
     "node-persist": "^3.1.0",
-    "node-telegram-bot-api": "^0.54.0"
+    "node-telegram-bot-api": "^0.54.0",
+    "typescript": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^16.10.3"
   }
 }
