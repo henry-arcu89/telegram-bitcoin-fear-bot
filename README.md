@@ -31,7 +31,7 @@ $ yarn start
 ```
 
 
-#Use
+## Use
 
 - If send any message, it's reply with help info.
 - If you send '/start', 'start', 'START' or 'Start', it sends you the index value every hour (this period can be configured)
