@@ -18,6 +18,7 @@ let subscribed = [] as Chatconfig[];
 
 void (async function main() {
   subscribed = await loadData();
+  await initOldFearValue();
 })();
 
 let the_interval = MINUTES * 60 * 1000;
@@ -25,13 +26,14 @@ let loop = 0;
 setInterval(function () {
   axios
     .get("https://api.alternative.me/fng/")
-    .then(function (response) {
+    .then(async function (response) {
       const fear: number = response.data.data[0].value;
       const message = getMessage(fear);
 
-      if (isTheMomentForSendIt(fear, loop)) {
+      if (await isTheMomentForSendIt(fear, loop)) {
         sendMessageSubscription(message);
       }
+      storage.setItem('oldFearValue', fear);
     })
     .catch(function (error) {
       console.log(error);
@@ -96,14 +98,14 @@ bot.on("message", (msg) => {
 });
 
 function getMessage(fear: number): string {
-  if (fear >= 80) {
+  if (fear >= 85) {
     return (
       "OMG SELL NOW, It's a bubble: \u{1F6A8}\u{1F6A8}\u{1F6A8} The Fear & Greed Index of Bitcoin is " +
       fear
     );
-  } else if (fear >= 75 && fear < 80) {
+  } else if (fear >= 78 && fear < 85) {
     return "SELL: \u{1F6A8}\u{1F6A8} The Fear & Greed Index of Bitcoin is " + fear;
-  } else if (fear >= 70 && fear < 75) {
+  } else if (fear >= 70 && fear < 78) {
     return "Attention: \u{1F6A8} The Fear & Greed Index of Bitcoin is " + fear;
   } else if (fear <= 30 && fear > 25) {
     return "Attention: \u{1F6A8} The Fear & Greed Index of Bitcoin is " + fear;
@@ -129,22 +131,25 @@ function sendMessageSubscription(message: string) {
   }
 }
 
-function isTheMomentForSendIt(fear: number, loop: number): boolean {
-  if ((fear >= 80 || fear <= 20) && loop % 1 == 0) {
-    return true;
-  }
+async function isTheMomentForSendIt(fear: number, loop: number): Promise<boolean> {
 
-  if (
-    ((fear < 80 && fear >= 75) || (fear > 20 && fear <= 25)) &&
-    loop % 2 == 0
-  ) {
-    return true;
-  }
-
-  if (
-    ((fear < 75 && fear >= 70) || (fear > 25 && fear <= 30)) &&
+  if (((fear >= 85 || fear <= 20) && loop % 1 == 0) &&
     loop % 4 == 0
   ) {
+    return true;
+  }
+
+  const oldFearValue = await getOldFearValue() as unknown as Number
+
+  if (oldFearValue == fear) {
+    return false;
+  }
+
+  if ((fear < 85 && fear >= 78) || (fear > 20 && fear <= 25)) {
+    return true;
+  }
+
+  if ((fear < 78 && fear >= 70) || (fear > 25 && fear <= 30)) {
     return true;
   }
 
@@ -163,6 +168,26 @@ async function loadData(): Promise<Chatconfig[]> {
   }
 
   return Object.values(await storage.getItem("subscribed")) as Chatconfig[];
+}
+
+async function initOldFearValue(): Promise<void> {
+  await storage.init({
+    stringify: JSON.stringify,
+    parse: JSON.parse,
+    encoding: "utf8",
+  });
+
+  if ((await storage.getItem("oldFearValue")) === undefined) {
+    await storage.setItem("oldFearValue", null);
+  }
+}
+
+async function getOldFearValue(): Promise<Number | null> {
+  if ((await storage.getItem("oldFearValue")) === undefined) {
+    await storage.setItem("oldFearValue", null);
+  }
+
+  return await storage.getItem("oldFearValue");
 }
 
 async function saveData(): Promise<void> {
